@@ -4,12 +4,27 @@ set -eo pipefail
 # Query the size of a specified GitHub repository
 # Prerequisite: coreutils, curl, jq
 
-if [ $# -ne 1 ]; then
+print_help(){
     echo "Usage: gh repo-size owner/repo"
     exit 1
+}
+
+if [ $# -ne 1 ]; then
+    print_help
 fi
 
 REPO=$1
+
+# Match different styles
+if [[ $REPO =~ ^https?://github\.com/(.+) ]]; then
+    REPO="${BASH_REMATCH[1]}"
+elif [[ $REPO =~ ^github\.com/(.+) ]]; then
+    REPO="${BASH_REMATCH[1]}"
+fi
+
+if [[ ! $REPO =~ ^[^/]+/[^/]+$ ]]; then
+    print_help
+fi
 
 # Use bare API
 # repo_size=$(curl -s "https://api.github.com/repos/${repo_info}" | jq '.size' | numfmt --to=iec --from-unit=1024 | tr -d '\n')

@@ -13,8 +13,10 @@ GNU Coreutils (mostly already installed), cURL & jq.
 # Install
 gh ext install Vinfall/gh-repo-size
 
-# Usage
+# Usage, accepted styles
 gh repo-size Vinfall/gh-repo-size
+gh repo-size github.com/torvalds/linux
+gh repo-size https://github.com/torvalds/linux
 
 # Uninstall
 gh ext remove Vinfall/gh-repo-size
