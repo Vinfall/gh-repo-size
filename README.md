@@ -17,7 +17,7 @@ gh ext install Vinfall/gh-repo-size
 gh repo-size Vinfall/gh-repo-size
 
 # Uninstall
-gh ext uninstall Vinfall/gh-repo-size
+gh ext remove Vinfall/gh-repo-size
 ```
 
 ## [License](/COPYING)
