@@ -1,0 +1,28 @@
+#!/bin/bash
+set -eo pipefail
+
+# Query the size of a specified GitHub repository
+# Prerequisite: coreutils, curl, jq
+
+if [ $# -ne 1 ]; then
+    echo "Usage: gh repo-size owner/repo"
+    exit 1
+fi
+
+REPO=$1
+
+# Use bare API
+# repo_size=$(curl -s "https://api.github.com/repos/${repo_info}" | jq '.size' | numfmt --to=iec --from-unit=1024 | tr -d '\n')
+
+# Use GH API (higher rate limit)
+repo_data=$(gh api "repos/${REPO}" --jq '.size')
+# Convert to human readable unit
+repo_size=$(numfmt --to=iec --from-unit=1024 <<< "$repo_data")
+
+
+if [ -z "$repo_size" ]; then
+    echo "Repo not found or API rate limited."
+    exit 1
+fi
+
+echo "${repo_size}"
