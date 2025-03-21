@@ -2,6 +2,7 @@
 
 [GitHub-CLI](https://github.com/cli/cli) extension demo to query the size of a specified GitHub repository.
 Yeah, as simple as that.
+Currently, submodule is not counted.
 
 ## Prerequisites
 
