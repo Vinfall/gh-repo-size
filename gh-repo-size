@@ -9,8 +9,14 @@ print_help(){
     exit 1
 }
 
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ] || [ $# -gt 2 ]; then
     print_help
+fi
+
+RAW=false
+if [ "$1" == "-r" ] || [ "$1" == "--raw" ]; then
+    RAW=true
+    shift
 fi
 
 REPO=$1
@@ -26,14 +32,15 @@ if [[ ! $REPO =~ ^[^/]+/[^/]+$ ]]; then
     print_help
 fi
 
-# Use bare API
-# repo_size=$(curl -s "https://api.github.com/repos/${repo_info}" | jq '.size' | numfmt --to=iec --from-unit=1024 | tr -d '\n')
-
-# Use GH API (higher rate limit)
-repo_data=$(gh api "repos/${REPO}" --jq '.size')
-# Convert to human readable unit
-repo_size=$(numfmt --to=iec --from-unit=1024 <<< "$repo_data")
-
+if $RAW; then
+    # Use bare API
+    repo_size=$(curl -s "https://api.github.com/repos/${REPO}" | jq '.size' | numfmt --to=iec --from-unit=1024 | tr -d '\n')
+else
+    # Use GH API (higher rate limit)
+    repo_data=$(gh api "repos/${REPO}" --jq '.size')
+    # Convert to human readable unit
+    repo_size=$(numfmt --to=iec --from-unit=1024 <<< "$repo_data")
+fi
 
 if [ -z "$repo_size" ]; then
     echo "Repo not found or API rate limited."
