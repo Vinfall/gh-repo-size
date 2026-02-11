@@ -6,13 +6,13 @@ Currently, submodule is not counted.
 
 ## Prerequisites
 
-GNU Coreutils (mostly already installed), cURL & jq.
+Nushell
 
 ## Quickstart
 
 ```sh
 # Install
-gh ext install Vinfall/gh-repo-size
+gh ext install Vinfall/gh-repo-size --pin nushell
 
 # Usage, accepted styles
 gh repo-size Vinfall/gh-repo-size

@@ -1,0 +1,5 @@
+[rules]
+wrap_external_with_complete = "off"
+non_final_failure_check = "off"
+add_label_to_error = "off"
+string_may_be_bare = "off"

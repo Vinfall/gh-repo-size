@@ -1,60 +1,35 @@
-#!/bin/bash
-set -eo pipefail
+#!/usr/bin/env -S nu --stdin
+# Query the size of select GitHub repository
 
-# Query the size of select GitHub repository.
-# Prerequisite: coreutils, curl, jq
+def main [
+    repo: string,           # [owner/repo] or URL
+    --raw (-r)              # Request via bare API (lower rate limit)
+]: any -> filesize {
+    # parse string
+    let repo_path: string = (
+        $repo | str replace --regex '^(https?://)?github\.com/|/+$' ''
+    )
 
-for cmd in curl jq numfmt; do
-    if ! command -v $cmd &>/dev/null; then
-        echo "Error: $cmd is not installed." >&2
-        exit 1
-    fi
-done
+    # validate
+    if ($repo_path !~ '/') {
+        error make {msg: "Usage: gh repo-size owner/repo"}
+    }
 
-print_help(){
-    echo "Usage: gh repo-size owner/repo"
-    echo ""
-    echo "Flags:"
-    echo "  -r, --raw    Request via bare API"
-    exit 0
+    # get data
+    let size_kb: int = try {
+        if $raw {
+            # c.f. curl+jq
+            (http get $"https://api.github.com/repos/($repo_path)").size
+        } else {
+            # github-cli
+            (gh api $"repos/($repo_path)" | from json).size
+        }
+    } catch {
+        error make {
+            msg: $"Error: '($repo_path)' not found or API rate limited."
+        }
+    }
+
+    # format
+    ($size_kb * 1kb) | into filesize
 }
-
-if [ $# -lt 1 ] || [ $# -gt 2 ]; then
-    print_help
-fi
-
-RAW=false
-if [ "$1" == "-r" ] || [ "$1" == "--raw" ]; then
-    RAW=true
-    shift
-fi
-
-REPO=$1
-
-# Match different styles
-if [[ $REPO =~ ^https?://github\.com/(.+) ]]; then
-    REPO="${BASH_REMATCH[1]}"
-elif [[ $REPO =~ ^github\.com/(.+) ]]; then
-    REPO="${BASH_REMATCH[1]}"
-fi
-
-if [[ ! $REPO =~ ^[^/]+/[^/]+$ ]]; then
-    print_help
-fi
-
-if $RAW; then
-    # Use bare API
-    repo_size=$(curl -s "https://api.github.com/repos/${REPO}" | jq '.size' | numfmt --to=iec --from-unit=1024 | tr -d '\n')
-else
-    # Use GH API (higher rate limit)
-    repo_data=$(gh api "repos/${REPO}" --jq '.size')
-    # Convert to human readable unit
-    repo_size=$(numfmt --to=iec --from-unit=1024 <<< "$repo_data")
-fi
-
-if [ -z "$repo_size" ]; then
-    echo "Error: Repo not found or API rate limited."
-    exit 1
-fi
-
-echo "${repo_size}"
