@@ -1,12 +1,22 @@
 #!/bin/bash
 set -eo pipefail
 
-# Query the size of a specified GitHub repository
+# Query the size of select GitHub repository.
 # Prerequisite: coreutils, curl, jq
+
+for cmd in curl jq numfmt; do
+    if ! command -v $cmd &>/dev/null; then
+        echo "Error: $cmd is not installed." >&2
+        exit 1
+    fi
+done
 
 print_help(){
     echo "Usage: gh repo-size owner/repo"
-    exit 1
+    echo ""
+    echo "Flags:"
+    echo "  -r, --raw    Request via bare API"
+    exit 0
 }
 
 if [ $# -lt 1 ] || [ $# -gt 2 ]; then
@@ -43,7 +53,7 @@ else
 fi
 
 if [ -z "$repo_size" ]; then
-    echo "Repo not found or API rate limited."
+    echo "Error: Repo not found or API rate limited."
     exit 1
 fi
 
