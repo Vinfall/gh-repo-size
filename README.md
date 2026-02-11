@@ -1,6 +1,6 @@
 # gh repo-size
 
-[GitHub-CLI](https://github.com/cli/cli) extension demo to query the size of a specified GitHub repository.
+[GitHub-CLI](https://github.com/cli/cli) extension to query the size of select GitHub repository.
 Yeah, as simple as that.
 Currently, submodule is not counted.
 
